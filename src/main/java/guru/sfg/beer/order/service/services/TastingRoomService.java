@@ -31,9 +31,9 @@ public class TastingRoomService {
         this.beerOrderService = beerOrderService;
         this.beerOrderRepository = beerOrderRepository;
 
-        beerUpcs.add(BeerOrderBootStrap.BEER_1_UPC);
-        beerUpcs.add(BeerOrderBootStrap.BEER_2_UPC);
-        beerUpcs.add(BeerOrderBootStrap.BEER_3_UPC);
+        beerUpcs.add(BeerOrderBootStrap.BEER_CRISTAL_UPC);
+        beerUpcs.add(BeerOrderBootStrap.BEER_BUCANERO_UPC);
+        beerUpcs.add(BeerOrderBootStrap.BEER_TINIMA_UPC);
     }
 
     @Transactional
@@ -50,10 +50,9 @@ public class TastingRoomService {
     }
 
     private void doPlaceOrder(Customer customer) {
-        String beerToOrder = getRandomBeerUpc();
 
         BeerOrderLineDto beerOrderLine = BeerOrderLineDto.builder()
-                .upc(beerToOrder)
+                .upc(getRandomBeerUpc())
                 .orderQuantity(new Random().nextInt(6)) //todo externalize value to property
                 .build();
 
@@ -71,6 +70,6 @@ public class TastingRoomService {
     }
 
     private String getRandomBeerUpc() {
-        return beerUpcs.get(new Random().nextInt(beerUpcs.size() -0));
+        return beerUpcs.get(new Random().nextInt(beerUpcs.size()));
     }
 }
