@@ -36,10 +36,10 @@ public class BeerServiceRestTemplateImpl implements BeerService {
     }
 
     @Override
-    public Optional<BeerDto> getBeerById(UUID uuid) {
+    public Optional<BeerDto> getBeerById(Long beerId) {
         log.debug("Calling Beer Service");
         log.info(beerServiceHost + BEER_ID_PATH);
-        return Optional.ofNullable(restTemplate.getForObject(beerServiceHost + BEER_ID_PATH + uuid.toString(), BeerDto.class));
+        return Optional.ofNullable(restTemplate.getForObject(beerServiceHost + BEER_ID_PATH + beerId.toString(), BeerDto.class));
     }
 
 }
