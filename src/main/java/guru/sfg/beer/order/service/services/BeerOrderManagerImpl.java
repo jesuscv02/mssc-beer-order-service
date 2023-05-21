@@ -21,7 +21,7 @@ import java.util.UUID;
 @Service
 public class BeerOrderManagerImpl implements BeerOrderManager {
 
-    public static final String ORDER_ID_HEADER ="ORDER_ID_HEADER";
+    public static final String ORDER_ID_HEADER = "ORDER_ID_HEADER";
     private final StateMachineFactory<BeerOrderStatus, BeerOrderEvent> stateMachineFactory;
     private final BeerOrderRepository repository;
     private final BeerOrderStateChangeInterceptor interceptor;
@@ -61,9 +61,12 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
     @Override
     public void processValidationResult(UUID beerOrderId, Boolean isValid) {
         BeerOrder beerOrder = repository.findOneById(beerOrderId);
-        if(isValid)
+        if (isValid) {
             sendBeerOrderEvent(beerOrder, BeerOrderEvent.VALIDATION_PASSED);
-        else
+            BeerOrder validatedOrder = repository.findOneById(beerOrderId);
+            sendBeerOrderEvent(validatedOrder, BeerOrderEvent.ALLOCATE_ORDER);
+        } else {
             sendBeerOrderEvent(beerOrder, BeerOrderEvent.VALIDATION_FAILED);
+        }
     }
 }
