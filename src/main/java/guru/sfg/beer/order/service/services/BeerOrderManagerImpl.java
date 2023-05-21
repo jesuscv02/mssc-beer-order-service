@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 @RequiredArgsConstructor
 @Service
 public class BeerOrderManagerImpl implements BeerOrderManager {
@@ -30,13 +32,13 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
         beerOrder.setId(null);
         beerOrder.setOrderStatus(BeerOrderStatus.NEW);
         BeerOrder savedBeerOrder = repository.save(beerOrder);
-        sendBeerOrderEvent(savedBeerOrder);
+        sendBeerOrderEvent(savedBeerOrder, BeerOrderEvent.VALIDATE_ORDER);
         return savedBeerOrder;
     }
 
-    private void sendBeerOrderEvent(BeerOrder beerOrder) {
+    private void sendBeerOrderEvent(BeerOrder beerOrder, BeerOrderEvent event) {
         StateMachine<BeerOrderStatus, BeerOrderEvent> sm = build(beerOrder);
-        Message<BeerOrderEvent> msg = MessageBuilder.withPayload(BeerOrderEvent.VALIDATE_ORDER)
+        Message<BeerOrderEvent> msg = MessageBuilder.withPayload(event)
                 .setHeader(ORDER_ID_HEADER, beerOrder.getId().toString())
                 .build();
         Mono<Message<BeerOrderEvent>> messageMono = Mono.just(msg);
@@ -54,5 +56,14 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
                 });
         sm.startReactively();
         return sm;
+    }
+
+    @Override
+    public void processValidationResult(UUID beerOrderId, Boolean isValid) {
+        BeerOrder beerOrder = repository.findOneById(beerOrderId);
+        if(isValid)
+            sendBeerOrderEvent(beerOrder, BeerOrderEvent.VALIDATION_PASSED);
+        else
+            sendBeerOrderEvent(beerOrder, BeerOrderEvent.VALIDATION_FAILED);
     }
 }

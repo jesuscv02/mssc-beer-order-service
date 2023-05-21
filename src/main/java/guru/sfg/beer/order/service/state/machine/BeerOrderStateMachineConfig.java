@@ -36,9 +36,9 @@ public class BeerOrderStateMachineConfig extends StateMachineConfigurerAdapter<B
                 .action(validateBeerOrderAction)
                 .and()
                 .withExternal().source(BeerOrderStatus.NEW).target(BeerOrderStatus.VALIDATED)
-                .event(BeerOrderEvent.VALIDATION_PASS)
+                .event(BeerOrderEvent.VALIDATION_PASSED)
                 .and()
                 .withExternal().source(BeerOrderStatus.NEW).target(BeerOrderStatus.VALIDATION_EXCEPTION)
-                .event(BeerOrderEvent.VALIDATION_FAIL);
+                .event(BeerOrderEvent.VALIDATION_FAILED);
     }
 }
