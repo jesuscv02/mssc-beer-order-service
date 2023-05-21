@@ -1,8 +1,10 @@
 package guru.sfg.beer.order.service.state.machine;
 
-import guru.sfg.beer.order.service.domain.BeerOrderEven;
+import guru.sfg.beer.order.service.domain.BeerOrderEvent;
 import guru.sfg.beer.order.service.domain.BeerOrderStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.EnableStateMachineFactory;
 import org.springframework.statemachine.config.StateMachineConfigurerAdapter;
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
@@ -11,10 +13,12 @@ import org.springframework.statemachine.config.builders.StateMachineTransitionCo
 import java.util.EnumSet;
 
 @Configuration
+@RequiredArgsConstructor
 @EnableStateMachineFactory
-public class BeerOrderStateMachineConfig extends StateMachineConfigurerAdapter<BeerOrderStatus, BeerOrderEven> {
+public class BeerOrderStateMachineConfig extends StateMachineConfigurerAdapter<BeerOrderStatus, BeerOrderEvent> {
+    private final Action<BeerOrderStatus, BeerOrderEvent> validateBeerOrderAction;
     @Override
-    public void configure(StateMachineStateConfigurer<BeerOrderStatus, BeerOrderEven> states) throws Exception {
+    public void configure(StateMachineStateConfigurer<BeerOrderStatus, BeerOrderEvent> states) throws Exception {
         states.withStates()
                 .initial(BeerOrderStatus.NEW)
                 .states(EnumSet.allOf(BeerOrderStatus.class))
@@ -26,14 +30,15 @@ public class BeerOrderStateMachineConfig extends StateMachineConfigurerAdapter<B
     }
 
     @Override
-    public void configure(StateMachineTransitionConfigurer<BeerOrderStatus, BeerOrderEven> transitions) throws Exception {
-        transitions.withExternal().source(BeerOrderStatus.NEW).target(BeerOrderStatus.NEW)
-                .event(BeerOrderEven.VALIDATE_ORDER)
+    public void configure(StateMachineTransitionConfigurer<BeerOrderStatus, BeerOrderEvent> transitions) throws Exception {
+        transitions.withExternal().source(BeerOrderStatus.NEW).target(BeerOrderStatus.VALIDATION_PENDING)
+                .event(BeerOrderEvent.VALIDATE_ORDER)
+                .action(validateBeerOrderAction)
                 .and()
                 .withExternal().source(BeerOrderStatus.NEW).target(BeerOrderStatus.VALIDATED)
-                .event(BeerOrderEven.VALIDATION_PASS)
+                .event(BeerOrderEvent.VALIDATION_PASS)
                 .and()
                 .withExternal().source(BeerOrderStatus.NEW).target(BeerOrderStatus.VALIDATION_EXCEPTION)
-                .event(BeerOrderEven.VALIDATION_FAIL);
+                .event(BeerOrderEvent.VALIDATION_FAIL);
     }
 }
