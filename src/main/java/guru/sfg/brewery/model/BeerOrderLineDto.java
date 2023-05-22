@@ -49,8 +49,9 @@ public class BeerOrderLineDto {
     private OffsetDateTime lastModifiedDate = null;
     private String upc;
     private String beerName;
-    private Long beerId;
+    private UUID beerId;
     private String beerStyle;
     private BigDecimal price;
     private Integer orderQuantity = 0;
+    private Integer quantityAllocated;
 }
